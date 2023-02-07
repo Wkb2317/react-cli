@@ -16,6 +16,7 @@ module.exports = {
         port: 3000,
         hot: true,   // 热更新
         compress: true, // 压缩
+        open: true
     },
     module: {
         rules: [

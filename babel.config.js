@@ -1,7 +1,7 @@
 module.exports = {
     presets: [
         [
-            '@babel/presets-env',
+            '@babel/preset-env',
             // 按需加载
             { useBuiltIns: 'usage'},
         ],
