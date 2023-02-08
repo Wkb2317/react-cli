@@ -1,5 +1,7 @@
 const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");  // 压缩css
+const ESLintPlugin = require('eslint-webpack-plugin');
 const { presetCssLoader } = require('./util/util')
 module.exports = {
     mode: 'development',
@@ -11,6 +13,7 @@ module.exports = {
         assetModuleFilename: 'static/media/[hash:10][ext][query]',
         clean: true
     },
+    devtool: 'cheap-module-source-map'
     devServer: {
         static: path.resolve(__dirname, '../dist'),
         port: 3000,
@@ -68,7 +71,13 @@ module.exports = {
         // 处理html,将html文件移动到打包目录中
         new HtmlWebpackPlugin({
             template: path.resolve(__dirname, '../public/index.html')
-        })
+        }),
+        //压缩css
+        new CssMinimizerPlugin(),
+        // eslint
+        new ESLintPlugin() 
     ],
-
+    optimization: {
+        minimize: true,
+    },
 }
