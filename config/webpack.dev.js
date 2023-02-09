@@ -26,7 +26,7 @@ module.exports = {
   devtool: 'cheap-module-source-map',
   devServer: {
     port: 3000,
-
+    historyApiFallback: true,
     hot: true, // 热更新
     compress: true, // 压缩
     open: true,

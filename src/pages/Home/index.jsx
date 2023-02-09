@@ -1,5 +1,5 @@
 import React from 'react'
 
 export default function Home() {
-  return <p>ccc</p>
+  return <p>home</p>
 }
