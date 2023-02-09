@@ -3,25 +3,28 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin') // 压缩css
 const MiniCssExtractPlugin = require('mini-css-extract-plugin') // 提取css到单独文件
 const ESLintPlugin = require('eslint-webpack-plugin')
-const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin') // react 热更新插件
-
+const TerserPlugin = require('terser-webpack-plugin')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
+const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin')
 const { presetCssLoader } = require('./util/util')
 
+const isProduction = process.env.NODE_ENV === 'production'
+
 module.exports = {
-  mode: 'development',
+  mode: isProduction ? 'production' : 'development',
   entry: './src/index.js', // webpack解析模块加载
   resolve: {
     // 自动补全扩展名
     extensions: ['.jsx', '.js', '.json']
   },
   output: {
-    filename: 'static/js/[name].js',
-    path: undefined, // 开发环境不需要设置打包路径
-    chunkFilename: 'static/js/[name].chunk.js',
+    filename: 'static/js/[name].[contenthash:10].js',
+    path: isProduction ? path.resolve(__dirname, '../dist') : undefined, // 开发环境不需要设置打包路径
+    chunkFilename: 'static/js/[name].[contenthash:10].chunk.js',
     assetModuleFilename: 'static/media/[hash:10][ext][query]',
     clean: true
   },
-  devtool: 'cheap-module-source-map',
+  devtool: isProduction ? 'source-map' : 'cheap-module-source-map',
   devServer: {
     port: 3000,
     historyApiFallback: true,
@@ -68,7 +71,7 @@ module.exports = {
         loader: 'babel-loader',
         options: {
           cacheDirectory: true, // 开启缓存，优化打包速度
-          plugins: ['react-refresh/babel'] // react热更新插件
+          plugins: [!isProduction && 'react-refresh/babel'].filter(Boolean) // react热更新插件
         }
       }
     ]
@@ -78,8 +81,10 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, '../public/index.html')
     }),
-    new MiniCssExtractPlugin(), //压缩css
-    new CssMinimizerPlugin(), // eslint
+    new MiniCssExtractPlugin({
+      filename: 'static/css/[name].[contenthash:10].css',
+      chunkFilename: 'static/css/[name].[contenthash:10].chunk.css'
+    }), //提取css
     new ESLintPlugin({
       context: path.resolve(__dirname, '../src'),
       exclude: 'node_modules',
@@ -89,12 +94,27 @@ module.exports = {
         '../node_modules/.cache/.eslintcache'
       )
     }),
-    new ReactRefreshWebpackPlugin({
-      overlay: false
-    })
-  ],
+    isProduction &&
+      new CopyWebpackPlugin({
+        patterns: [
+          {
+            from: path.resolve(__dirname, '../public'),
+            to: path.resolve(__dirname, '../dist'),
+            globOptions: {
+              ignore: '**/index.html'
+            }
+          }
+        ]
+      }),
+    !isProduction &&
+      new ReactRefreshWebpackPlugin({
+        overlay: false
+      })
+  ].filter(Boolean),
+  // 优化器
   optimization: {
-    minimize: true,
+    minimize: isProduction,
+    minimizer: [new CssMinimizerPlugin(), new TerserPlugin()],
     splitChunks: {
       chunks: 'all'
     },
