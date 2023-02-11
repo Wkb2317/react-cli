@@ -24,7 +24,7 @@ module.exports = {
     assetModuleFilename: 'static/media/[hash:10][ext][query]',
     clean: true
   },
-  devtool: isProduction ? 'source-map' : 'cheap-module-source-map',
+  devtool: isProduction ? 'none' : 'cheap-module-source-map',
   devServer: {
     port: 3000,
     historyApiFallback: true,
@@ -116,7 +116,24 @@ module.exports = {
     minimize: isProduction,
     minimizer: [new CssMinimizerPlugin(), new TerserPlugin()],
     splitChunks: {
-      chunks: 'all'
+      chunks: 'all',
+      cacheGroups: {
+        react: {
+          test: /[\\/]node_modules[\\/]react(.*)?/,
+          name: 'chunk-react',
+          priority: 40 // 优先级
+        },
+        antd: {
+          test: /[\\/]node_modules[\\/]antd[\\/]/,
+          name: 'chunk-antd',
+          priority: 30
+        },
+        libs: {
+          test: /[\\/]node_modules[\\/]/,
+          name: 'chunk-libs',
+          priority: 20
+        }
+      }
     },
     // 缓存
     runtimeChunk: {

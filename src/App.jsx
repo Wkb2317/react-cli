@@ -1,5 +1,6 @@
 import React, { Suspense, lazy } from 'react'
 import { Route, Routes, Link, BrowserRouter } from 'react-router-dom'
+import { Button } from 'antd'
 import './index.less'
 
 const About = lazy(() => import('./pages/About/index'))
@@ -9,6 +10,7 @@ export default function App() {
   return (
     <div>
       <p>App</p>
+      <Button type="primary">点击</Button>
       <BrowserRouter>
         <Link to="/home">home</Link>
         <Link to="/about">about</Link>
